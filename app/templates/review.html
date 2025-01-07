@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h3 class="text-center mb-4" style="font-weight: bold; color: #333;">User Reviews</h3>
+
+        <!-- Reviews Form -->
+        {% if user.is_authenticated %}
+            <div class="card p-4 mb-4" style="background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                <h4>Leave Your Review</h4>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ form.as_p }}  <!-- Form fields for rating and comment -->
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                </form>
+            </div>
+        {% else %}
+        <p style="font-size: 30px;">Please <a href="{% url 'login' %}" style="font-size: 18px; padding: 10px 20px; background-color: #007bff; color: white; border-radius: 5px; text-decoration: none; display: inline-block; text-align: center;">Login</a>
+            to give a review.</p>
+
+        {% endif %}
+
+        <h4 class="mt-5 mb-4" style="font-weight: bold;">All Reviews:</h4>
+        <div class="reviews-container" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+            <ul class="list-group">
+                {% for review in reviews %}
+                    <li class="list-group-item" style="background-color: #ffffff; padding: 15px; margin-bottom: 10px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                        <strong>{{ review.user.username }}</strong> 
+                        <span style="color: #f39c12; font-weight: bold;">Rating: {{ review.rating }}/5</span>
+                        <p style="font-style: italic; color: #555;">{{ review.comment }}</p>
+                        <small class="text-muted">Posted on {{ review.date_posted }}</small>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item" style="background-color: #ffffff; padding: 15px;">No reviews yet. Be the first to leave one!</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}

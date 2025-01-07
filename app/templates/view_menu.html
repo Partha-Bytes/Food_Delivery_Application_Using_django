@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Menu - DineDoor
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Our Menu</h2>
+    <div class="row">
+        {% for dish in menu %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <img src="{{ dish.dish_image.url }}" class="card-img-top" alt="{{ dish.dish_name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ dish.dish_name }}</h5>
+                    <p class="card-text">{{ dish.dish_dis }}</p>
+                    <p class="card-text">Price: Rs {{ dish.price }}</p>
+
+                    <!-- Button Container -->
+                    <div id="cart-btn-container-{{ dish.id }}">
+                        {% if dish.id in user_cart %}
+                        <button 
+                            type="button" 
+                            class="btn btn-danger remove-from-cart-btn mt-2" 
+                            data-dish-id="{{ dish.id }}" 
+                            id="remove-btn-{{ dish.id }}">
+                            Remove from Cart
+                        </button>
+                        {% else %}
+                        <form id="add-to-cart-form-{{ dish.id }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="dish_id" value="{{ dish.id }}">
+                            <div class="form-group">
+                                <label for="quantity_{{ dish.id }}">Quantity</label>
+                                <input type="number" name="quantity" id="quantity_{{ dish.id }}" value="1" min="1" class="form-control" required>
+                            </div>
+                            <button 
+                                type="button" 
+                                class="btn btn-primary mt-2 add-to-cart-btn" 
+                                data-dish-id="{{ dish.id }}" 
+                                id="add-btn-{{ dish.id }}">
+                                Add to Cart
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Initialize event listeners once when the page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        attachEventListeners();
+    });
+
+    // Function to add event listeners for Add and Remove Cart buttons
+    function attachEventListeners() {
+        // Add to Cart Button Event
+        document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+            button.removeEventListener('click', handleAddToCart);
+            button.addEventListener('click', handleAddToCart);
+        });
+
+        // Remove from Cart Button Event
+        document.querySelectorAll('.remove-from-cart-btn').forEach(button => {
+            button.removeEventListener('click', handleRemoveFromCart);
+            button.addEventListener('click', handleRemoveFromCart);
+        });
+    }
+
+    // Handle Add to Cart
+    function handleAddToCart(event) {
+        const dishId = event.target.getAttribute('data-dish-id');
+        const quantity = document.querySelector(`#quantity_${dishId}`).value;
+        const csrfToken = document.querySelector(`#add-to-cart-form-${dishId} input[name='csrfmiddlewaretoken']`).value;
+
+        // Sending request to add dish to the cart
+        fetch(`/add-to-cart/${dishId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({ quantity: quantity }),  // Send quantity properly in the body
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Dynamically update the button from Add to Cart to Remove from Cart
+                    updateCartButton(dishId, 'remove');
+                } else {
+                    alert(data.message || "Failed to add to cart.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Handle Remove from Cart
+    function handleRemoveFromCart(event) {
+        const dishId = event.target.getAttribute('data-dish-id');
+        const csrfToken = document.querySelector(`input[name='csrfmiddlewaretoken']`).value;
+
+        // Sending request to remove dish from the cart
+        fetch(`/remove-from-cart/${dishId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Dynamically update the button from Remove to Add
+                    updateCartButton(dishId, 'add');
+                } else {
+                    alert(data.message || "Failed to remove from cart.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Function to update the button based on the action (Add/Remove)
+    function updateCartButton(dishId, action) {
+        const container = document.querySelector(`#cart-btn-container-${dishId}`);
+        if (action === 'remove') {
+            container.innerHTML = `  
+                <button 
+                    type="button" 
+                    class="btn btn-danger remove-from-cart-btn mt-2" 
+                    data-dish-id="${dishId}" 
+                    id="remove-btn-${dishId}">
+                    Remove from Cart
+                </button>
+            `;
+        } else if (action === 'add') {
+            container.innerHTML = `
+                <form id="add-to-cart-form-${dishId}">
+                    <input type="hidden" name="dish_id" value="${dishId}">
+                    <div class="form-group">
+                        <label for="quantity_${dishId}">Quantity</label>
+                        <input type="number" name="quantity" id="quantity_${dishId}" value="1" min="1" class="form-control" required>
+                    </div>
+                    <button 
+                        type="button" 
+                        class="btn btn-primary mt-2 add-to-cart-btn" 
+                        data-dish-id="${dishId}" 
+                        id="add-btn-${dishId}">
+                        Add to Cart
+                    </button>
+                </form>
+            `;
+        }
+
+        // Reattach the event listeners after updating the button
+        attachEventListeners();
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Home</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+    />
+  </head>
+  {% comment %} <nav class="navbar p-2 bg-danger shadow-lg">
+    <div class="container-fluid">
+      <a class="navbar-brand">Dish</a>
+      <form class="d-flex" role="search">
+        <input class="form-control me-2" name="search" type="search" placeholder="Search" aria-label="Search">
+        <a href="/logout/" class="btn btn-outline-success" type="submit">Logout</a>
+      </form>
+    </div>
+  </nav> {% endcomment %}
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Zomato Chronicles</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/home/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Link</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Dropdown
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Action</a></li>
+              <li><a class="dropdown-item" href="#">Another action</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#">Something else here</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+          </li>
+        </ul>
+        <form class="d-flex" role="search">
+          <input class="form-control me-2 " name="search" type="search" placeholder="Search" aria-label="Search">
+          <a href="/logout/" class="btn btn-outline-success btn-light" type="submit">Logout</a>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <body>
+    <div class="container mt-5">
+      <h1>Hello, {{request.user.first_name}} </h1>
+      <form
+        class="col-6 mx-auto card p-3 shadow-lg"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        {% csrf_token %}
+        <h2>Add Dish</h2>
+        <hr />
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label"
+            >Dish name</label
+          >
+          <input
+            name="dish_name"
+            required
+            type="text"
+            class="form-control"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label"
+            >Dish Discription</label
+          >
+          <textarea name="dish_dis" required class="form-control">
+          </textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label"
+            >Dish Price</label
+          >
+          <input name="price"  type="number" required class="form-control"/>
+          
+        </div>
+
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label"
+            >Dish Image</label
+          >
+          <input name="dish_image" type="text" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-success">Add Dish</button>
+      </form>
+
+      <div class="mt-5">
+        <div class="mx-auto col-6">
+          <form>
+            <div class="mb-3">
+              <label for="exampleInputEmail1" class="form-label"
+                >search Food</label
+              >
+              <input name="search" type="text" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">search</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="container mt-5 col-auto mx-auto card p-3 shadow-lg">
+      <table class="table mt-3">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Dish Name</th>
+            <th scope="col">Dish Discription</th>
+            <th scope="col">Dish Price</th>
+            <th scope="col">Image</th>
+            <th scope="col">Actions</th>
+            <th scope="col">Availability</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for receipce in dish %}
+          <tr>
+            <th scope="row">{{forloop.counter}}</th>
+            <td>{{receipce.dish_name}}</td>
+            <td>{{receipce.dish_dis}}</td>
+            <td>{{receipce.price}}</td>
+            <td>
+              <img
+                src="{{receipce.dish_image}}"
+                style="height: 150px"
+              />
+            </td>
+
+            <td>
+              <a
+                href="{% url 'delete_dish' receipce.id %}"
+                class="btn btn-danger m-2"
+                >Delete Dish</a
+              >
+              <a
+                {% comment %} href="/update-dish/{{receipce.id}}/" {% endcomment %}
+                href="{% url 'update_dish' receipce.id %}"
+                class="btn btn-success m-2"
+                >Update Dish</a
+              >
+            </td>
+            <td>
+              <form method="post" action="{% url 'update_availability' receipce.id %}">
+                {% csrf_token %}
+                {% if receipce.availability %}
+                  <button type="submit" class="btn btn-success m-2">Available</button>
+                {% else %}
+                  <button type="submit" class="btn btn-danger m-2">Unavailable</button>
+                {% endif %}
+              </form>
+            </td>
+          </tr>
+
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>

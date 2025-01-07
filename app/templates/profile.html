@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="w-50">
+        <h2 class="text-center">User Profile</h2>
+
+        {% if messages %}
+            <div class="alert alert-info">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="first_name" class="form-label">First Name</label>
+                <input name="first_name" type="text" class="form-control" value="{{ form.first_name.value }}" required />
+            </div>
+            <div class="mb-3">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input name="last_name" type="text" class="form-control" value="{{ form.last_name.value }}" required />
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input name="email" type="email" class="form-control" value="{{ form.email.value }}" required />
+            </div>
+            <button type="submit" class="btn btn-success w-100">Update Profile</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Order</title>
+  <link rel="stylesheet" href="{% static 'css/cart.css' %}">
+  <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+  />
+  <script>
+    function togglePaymentFields() {
+        const paymentMethod = document.getElementById('payment_method').value;
+        const cardDetails = document.getElementById('card-details');
+        const upiDetails = document.getElementById('upi-details');
+
+        if (paymentMethod === 'Credit Card') {
+            cardDetails.style.display = 'block';
+            upiDetails.style.display = 'none';
+        } else if (paymentMethod === 'UPI') {
+            cardDetails.style.display = 'none';
+            upiDetails.style.display = 'block';
+        } else {
+            cardDetails.style.display = 'none';
+            upiDetails.style.display = 'none';
+        }
+    }
+  </script>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="card p-4 shadow-lg">
+        <h2 class="mb-4 text-center">Confirm Your Order</h2>
+        <p class="text-center"><strong>Total Price:</strong> Rs.{{ total_price }}</p>
+        <hr>
+
+        <!-- Show success or error messages -->
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li class="alert alert-info">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="text" name="phone" id="phone" class="form-control" placeholder="Enter your phone number" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="pincode" class="form-label">Pincode</label>
+                    <input type="text" name="pincode" id="pincode" class="form-control" placeholder="Enter your pincode" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="address" class="form-label">Delivery Address</label>
+                <textarea name="address" id="address" class="form-control" rows="3" placeholder="Enter your delivery address" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="payment_method" class="form-label">Payment Method</label>
+                <select name="payment_method" id="payment_method" class="form-select" onchange="togglePaymentFields()" required>
+                    <option value="Cash on Delivery">Cash on Delivery</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="UPI">UPI</option>
+                </select>
+            </div>
+            <!-- Credit Card Details -->
+            <div id="card-details" class="row mb-3" style="display: none;">
+                <div class="col-md-6">
+                    <label for="card_number" class="form-label">Card Number</label>
+                    <input type="text" name="card_number" id="card_number" class="form-control" placeholder="Enter your card number">
+                </div>
+                <div class="col-md-3">
+                    <label for="expiry_date" class="form-label">Expiry Date</label>
+                    <input type="text" name="expiry_date" id="expiry_date" class="form-control" placeholder="MM/YY">
+                </div>
+                <div class="col-md-3">
+                    <label for="cvv" class="form-label">CVV</label>
+                    <input type="text" name="cvv" id="cvv" class="form-control" placeholder="Enter CVV">
+                </div>
+            </div>
+            <!-- UPI Details -->
+            <div id="upi-details" class="mb-3" style="display: none;">
+                <label for="upi_id" class="form-label">UPI ID</label>
+                <input type="text" name="upi_id" id="upi_id" class="form-control" placeholder="Enter your UPI ID">
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <a href="{% url 'view_cart' %}" class="btn btn-danger w-100">Back to Cart</a>
+                </div>
+                <div class="col-md-6">
+                    <button type="submit" class="btn btn-primary w-100">Confirm Order</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>
+
+
